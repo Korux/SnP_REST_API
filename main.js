@@ -323,25 +323,26 @@ app.get('/songs', (req,res) => {
   }else{
     var offset = 0;
     if(req.query.page != null){
-      offset = 5 * (req.query.page - 1);
+      offset = 50 * (req.query.page - 1);
     }
     const query = datastore  
     .createQuery('song')
+    .limit(51)
     .offset(offset);
       
     datastore.runQuery(query).then(raws => {
       var entities = raws[0];
-      if(entities.length >= 6){
-        const next = URL + "songs?page="+((offset/5)+2);
-        var sliced = entities.slice(0,5);
+      if(entities.length == 51){
+        const next = URL + "songs?page="+((offset/50)+2);
+        var sliced = entities.slice(0,50);
         res
         .status(200)
-        .send({total:offset + entities.length,songs:sliced,next:next})
+        .send({songs:sliced,next:next})
         .end();
       }else{
         res
         .status(200)
-        .send({total:offset + entities.length,songs:entities})
+        .send({songs:entities})
         .end();
       }
     });
