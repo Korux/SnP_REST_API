@@ -1186,33 +1186,34 @@ app.post('/signup', (req,res) => {
     if (error){
         res.status(500).send(error);
     } else {
-      if(!body.id_token){
+      if(!body._id){
         res.status(400).send({Error : "Error with creating account"});
+      }else{
+        let ts = Date.now();
+
+        let date_ob = new Date(ts);
+        let date = date_ob.getDate();
+        let month = date_ob.getMonth() + 1;
+        let year = date_ob.getFullYear();
+  
+        const userKey = datastore.key("user");
+  
+        const user = {
+          email : email,
+          username : email,
+          joindate : year + "-" + month + "-" + date,
+          uid : "auth0|"+body._id
+        }
+  
+        const userEntity = {
+          key : userKey,
+          data : user
+        }
+  
+        datastore.upsert(userEntity).then(() => {
+          res.status(201).send(body);
+        })
       }
-      let ts = Date.now();
-
-      let date_ob = new Date(ts);
-      let date = date_ob.getDate();
-      let month = date_ob.getMonth() + 1;
-      let year = date_ob.getFullYear();
-
-      const userKey = datastore.key("user");
-
-      const user = {
-        email : email,
-        username : email,
-        joindate : year + "-" + month + "-" + date,
-        uid : "auth0|"+body._id
-      }
-
-      const userEntity = {
-        key : userKey,
-        data : user
-      }
-
-      datastore.upsert(userEntity).then(() => {
-        res.status(201).send(body);
-      })
     }
   });
 });
