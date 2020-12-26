@@ -1186,6 +1186,9 @@ app.post('/signup', (req,res) => {
     if (error){
         res.status(500).send(error);
     } else {
+      if(!body.id_token){
+        res.status(400).send({Error : "Error with creating account"});
+      }
       let ts = Date.now();
 
       let date_ob = new Date(ts);
