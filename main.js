@@ -6,6 +6,7 @@ console.log(process.env);
 const express = require('express');
 const app = express();
 const {Datastore} = require('@google-cloud/datastore');
+const {Storage} = require('@google-cloud/storage');
 const request = require('request');
 const datastore = new Datastore();
 const cors = require('cors');
@@ -18,6 +19,9 @@ const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const DOMAIN = 'cs493-291619.us.auth0.com';
 const URL = 'https://final-dot-cs493-291619.wl.r.appspot.com/';
 const PORT = process.env.PORT || 8080;
+
+const MP3_STORAGE = 'songs_mp3';
+const IMG_STORAGE = 'snp_imgs';
 
 app.use(cors());
 
@@ -53,7 +57,8 @@ function checkJwt(){
         const query = datastore  
         .createQuery('playlist')
         .filter("public",true)
-        .offset(offset);
+        .offset(offset)
+        .order("timestamp", {descending : true});
           
         datastore.runQuery(query).then(raws => {
           var entities = raws[0];
@@ -281,7 +286,8 @@ app.post('/songs', checkJwt(), (req,res) => {
           length : req.body.length,
           bpm : req.body.bpm,
           vocals : req.body.vocals,
-          genres : req.body.genres
+          genres : req.body.genres,
+          timestamp : Date.now()
         };
         const songkey = datastore.key('song');
         const songEntity = {
@@ -328,7 +334,8 @@ app.get('/songs', (req,res) => {
     const query = datastore  
     .createQuery('song')
     .limit(51)
-    .offset(offset);
+    .offset(offset)
+    .order("timestamp", {descending : true});
       
     datastore.runQuery(query).then(raws => {
       var entities = raws[0];
@@ -662,7 +669,8 @@ app.post('/playlists', checkJwt(), (req,res) => {
       numsongs : 0,
       songs : [],
       public : req.body.public,
-      owner : req.user.sub
+      owner : req.user.sub,
+      timestamp : Date.now()
     };
     const playlistkey = datastore.key('playlist');
     const playlistEntity = {
@@ -707,7 +715,8 @@ app.get('/playlists', checkJwt(), (req,res) => {
     const query = datastore  
     .createQuery('playlist')
     .filter("owner",req.user.sub)
-    .offset(offset);
+    .offset(offset)
+    .order("timestamp", {descending : true});
       
     datastore.runQuery(query).then(raws => {
       var entities = raws[0];
@@ -793,7 +802,8 @@ app.get('/users/:userid/playlists', (req,res) => {
         .createQuery('playlist')
         .filter("owner",req.params.userid)
         .filter("public",true)
-        .offset(offset);
+        .offset(offset)
+        .order("timestamp", {descending : true});
           
         datastore.runQuery(query).then(raws => {
           var entities = raws[0];
