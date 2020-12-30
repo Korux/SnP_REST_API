@@ -1,0 +1,19 @@
+indexes :
+- kind: playlist
+  properties:
+  - name: owner
+  - name: timestamp
+    direction: desc
+
+- kind: playlist
+  properties:
+  - name: public
+  - name: timestamp
+    direction: desc
+
+- kind: playlist
+  properties:
+  - name: owner
+  - name: public
+  - name: timestamp
+    direction: desc

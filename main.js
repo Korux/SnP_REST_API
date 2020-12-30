@@ -52,27 +52,28 @@ function checkJwt(){
       }else{
         var offset = 0;
         if(req.query.page != null){
-          offset = 5 * (req.query.page - 1);
+          offset = 50 * (req.query.page - 1);
         }
         const query = datastore  
         .createQuery('playlist')
         .filter("public",true)
+        .limit(51)
         .offset(offset)
         .order("timestamp", {descending : true});
           
         datastore.runQuery(query).then(raws => {
           var entities = raws[0];
-          if(entities.length >= 6){
-            const next = URL + "playlists?page="+((offset/5)+2);
-            var sliced = entities.slice(0,5);
+          if(entities.length >= 51){
+            const next = URL + "playlists?page="+((offset/50)+2);
+            var sliced = entities.slice(0,50);
             res
             .status(200)
-            .send({total:entities.length + offset,playlists:sliced,next:next})
+            .send({playlists:sliced,next:next})
             .end();
           }else{
             res
             .status(200)
-            .send({total:entities.length + offset,playlists:entities})
+            .send({playlists:entities})
             .end();
           }
         }); 
@@ -715,6 +716,7 @@ app.get('/playlists', checkJwt(), (req,res) => {
     const query = datastore  
     .createQuery('playlist')
     .filter("owner",req.user.sub)
+    .limit(51)
     .offset(offset)
     .order("timestamp", {descending : true});
       
@@ -796,28 +798,29 @@ app.get('/users/:userid/playlists', (req,res) => {
       }else{
         var offset = 0;
         if(req.query.page != null){
-          offset = 5 * (req.query.page - 1);
+          offset = 50 * (req.query.page - 1);
         }
         const query = datastore  
         .createQuery('playlist')
         .filter("owner",req.params.userid)
         .filter("public",true)
+        .limit(51)
         .offset(offset)
         .order("timestamp", {descending : true});
           
         datastore.runQuery(query).then(raws => {
           var entities = raws[0];
-          if(entities.length >= 6){
-            const next = URL + "users/"+req.params.userid+"/playlists?page="+((offset/5)+2);
-            var sliced = entities.slice(0,5);
+          if(entities.length >= 51){
+            const next = URL + "users/"+req.params.userid+"/playlists?page="+((offset/50)+2);
+            var sliced = entities.slice(0,50);
             res
             .status(200)
-            .send({total:entities.length + offset,playlists:sliced,next:next})
+            .send({playlists:sliced,next:next})
             .end();
           }else{
             res
             .status(200)
-            .send({total:entities.length + offset,playlists:entities})
+            .send({playlists:entities})
             .end();
           }
         });
