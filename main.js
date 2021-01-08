@@ -340,9 +340,13 @@ app.get('/songs', (req,res) => {
       
     datastore.runQuery(query).then(raws => {
       var entities = raws[0];
-      if(entities.length == 51){
+      var songs = entities.map((entity,i) => {
+        entity["id"] = entity[datastore.KEY].id;
+        return(entity);
+      });
+      if(songs.length == 51){
         const next = URL + "songs?page="+((offset/50)+2);
-        var sliced = entities.slice(0,50);
+        var sliced = songs.slice(0,50);
         res
         .status(200)
         .send({songs:sliced,next:next})
@@ -350,7 +354,7 @@ app.get('/songs', (req,res) => {
       }else{
         res
         .status(200)
-        .send({songs:entities})
+        .send({songs:songs})
         .end();
       }
     });
@@ -722,9 +726,13 @@ app.get('/playlists', checkJwt(), (req,res) => {
       
     datastore.runQuery(query).then(raws => {
       var entities = raws[0];
-      if(entities.length >= 51){
+      var playlists = entities.map((entity,i) => {
+        entity["id"] = entity[datastore.KEY].id;
+        return(entity);
+      });
+      if(playlists.length >= 51){
         const next = URL + "playlists?page="+((offset/50)+2);
-        var sliced = entities.slice(0,50);
+        var sliced = playlists.slice(0,50);
         res
         .status(200)
         .send({playlists:sliced,next:next})
@@ -732,7 +740,7 @@ app.get('/playlists', checkJwt(), (req,res) => {
       }else{
         res
         .status(200)
-        .send({playlists:entities})
+        .send({playlists:playlists})
         .end();
       }
     });
