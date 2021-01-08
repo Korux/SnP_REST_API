@@ -386,6 +386,7 @@ app.get('/songs/:songid', (req,res) => {
           bpm:entity.bpm,
           vocals:entity.vocals,
           genres:entity.genres,
+          timestamp:entity.timestamp,
           self:URL + "songs/"+querykey.id})
         .end();
       }else{
@@ -450,7 +451,8 @@ app.put('/songs/:songid', checkJwt(), (req,res) => {
               length : req.body.length,
               bpm : req.body.bpm,
               vocals : req.body.vocals,
-              genres : req.body.genres
+              genres : req.body.genres,
+              timestamp : entity.timestamp
             };
             const songEntity = {
               key : querykey,
@@ -467,6 +469,7 @@ app.put('/songs/:songid', checkJwt(), (req,res) => {
                 bpm:song.bpm,
                 vocals:song.vocals,
                 genres:song.genres,
+                timestamp:song.timestamp,
                 self:URL + "songs/"+querykey.id})
               .end();
             }).catch(() => {
@@ -579,7 +582,8 @@ app.patch('/songs/:songid',checkJwt(), (req,res) => {
               length : entity.length,
               bpm : entity.bpm,
               vocals : entity.vocals,
-              genres : entity.genres
+              genres : entity.genres,
+              timestamp : entity.timestamp
             };
 
             Object.keys(values).forEach(element => {
@@ -601,6 +605,7 @@ app.patch('/songs/:songid',checkJwt(), (req,res) => {
                 bpm:song.bpm,
                 vocals:song.vocals,
                 genres:song.genres,
+                timestamp:song.timestamp,
                 self:URL + "songs/"+querykey.id})
               .end();
             }).catch(() => {
@@ -774,6 +779,7 @@ app.get('/playlists/:playlistid', checkJwt(), (req,res) => {
           songs:entity.songs,
           public:entity.public,
           owner:entity.owner,
+          timestamp:entity.timestamp,
           self:URL + "playlists/"+querykey.id})
         .end();
       }else{
@@ -874,7 +880,8 @@ app.put('/playlists/:playlistid', checkJwt(), (req,res) => {
           numsongs : entity.numsongs,
           songs : entity.songs,
           public : req.body.public,
-          owner : entity.owner
+          owner : entity.owner,
+          timestamp : entity.timestamp
         };
         const playlistEntity = {
           key : querykey,
@@ -891,6 +898,7 @@ app.put('/playlists/:playlistid', checkJwt(), (req,res) => {
             songs:playlist.songs,
             public:playlist.public,
             owner:playlist.owner,
+            timestamp:playlist.timestamp,
             self:URL + "playlists/"+querykey.id})
           .end();
         }).catch(() => {
@@ -964,7 +972,8 @@ app.patch('/playlists/:playlistid', checkJwt(), (req,res) => {
           numsongs : entity.numsongs,
           songs : entity.songs,
           public : entity.public,
-          owner : entity.owner
+          owner : entity.owner,
+          timestamp : entity.timestamp
         };
 
         Object.keys(values).forEach(element => {
@@ -986,6 +995,7 @@ app.patch('/playlists/:playlistid', checkJwt(), (req,res) => {
             songs:playlist.songs,
             public:playlist.public,
             owner:playlist.owner,
+            timestamp:playlist.timestamp,
             self:URL + "playlists/"+querykey.id})
           .end();
         }).catch(() => {
