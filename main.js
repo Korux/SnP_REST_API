@@ -1032,7 +1032,8 @@ app.put('/playlists/:playlistid/songs/:songid',checkJwt(),(req,res) => {
           numsongs : results[0].numsongs + 1,
           songs : new_songs,
           public : results[0].public,
-          owner : results[0].owner
+          owner : results[0].owner,
+          timestamp : results[0].timestamp
         };
   
         const playlistEntity = {
@@ -1086,7 +1087,8 @@ app.delete('/playlists/:playlistid/songs/:songid',checkJwt(),(req,res) => {
           numsongs : results[0].numsongs - 1,
           songs : new_songs,
           public : results[0].public,
-          owner : results[0].owner
+          owner : results[0].owner,
+          timestamp : results[0].timestamp
         };
   
         const playlistEntity = {
