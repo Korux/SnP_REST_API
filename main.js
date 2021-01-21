@@ -430,38 +430,55 @@ app.put('/songs/:songid', checkJwt(), (req,res) => {
       }else if (entity == null){
         res.status(404).send({Error:"No song with this song_id exists"}).end();
       }else{
-        const song = {
-          name : req.body.name,
-          artist : req.body.artist,
-          length : req.body.length,
-          bpm : req.body.bpm,
-          vocals : req.body.vocals,
-          genres : req.body.genres,
-          timestamp : entity.timestamp
-        };
-        const songEntity = {
-          key : querykey,
-          data : song
-        };
-        datastore.update(songEntity).then(() => {
-          res
-          .status(200)
-          .json({
-            id:querykey.id,
-            name:song.name,
-            artist:song.artist,
-            length:song.length,
-            bpm:song.bpm,
-            vocals:song.vocals,
-            genres:song.genres,
-            timestamp:song.timestamp,
-            self:URL + "songs/"+querykey.id})
-          .end();
-        }).catch(() => {
-          res
-          .status(500)
-          .send({Error : "Unknown server error" })
-          .end();
+        const query = datastore.createQuery('song');
+
+        datastore.runQuery(query).then(raws => {
+          var entities = raws[0];
+          var valid = true;
+          entities.forEach(element => {
+            if(element.name == req.body.name && element.artist == req.body.artist){
+              valid = false;
+              res
+              .status(403)
+              .send({Error : "Song is already in the database" })
+              .end();
+            }
+          });
+          if(valid){
+            const song = {
+              name : req.body.name,
+              artist : req.body.artist,
+              length : req.body.length,
+              bpm : req.body.bpm,
+              vocals : req.body.vocals,
+              genres : req.body.genres,
+              timestamp : entity.timestamp
+            };
+            const songEntity = {
+              key : querykey,
+              data : song
+            };
+            datastore.update(songEntity).then(() => {
+              res
+              .status(200)
+              .json({
+                id:querykey.id,
+                name:song.name,
+                artist:song.artist,
+                length:song.length,
+                bpm:song.bpm,
+                vocals:song.vocals,
+                genres:song.genres,
+                timestamp:song.timestamp,
+                self:URL + "songs/"+querykey.id})
+              .end();
+            }).catch(() => {
+              res
+              .status(500)
+              .send({Error : "Unknown server error" })
+              .end();
+            });
+          }
         });
       }
     });
@@ -544,43 +561,60 @@ app.patch('/songs/:songid',checkJwt(), (req,res) => {
       }else if (entity == null){
         res.status(404).send({Error:"No song with this song_id exists"}).end();
       }else{
-        var song = {
-          name : entity.name,
-          artist : entity.artist,
-          length : entity.length,
-          bpm : entity.bpm,
-          vocals : entity.vocals,
-          genres : entity.genres,
-          timestamp : entity.timestamp
-        };
+        const query = datastore.createQuery('song');
 
-        Object.keys(values).forEach(element => {
-          song[element] = values[element];
-        });
-
-        const songEntity = {
-          key : querykey,
-          data : song
-        };
-        datastore.update(songEntity).then(() => {
-          res
-          .status(200)
-          .json({
-            id:querykey.id,
-            name:song.name,
-            artist:song.artist,
-            length:song.length,
-            bpm:song.bpm,
-            vocals:song.vocals,
-            genres:song.genres,
-            timestamp:song.timestamp,
-            self:URL + "songs/"+querykey.id})
-          .end();
-        }).catch(() => {
-          res
-          .status(500)
-          .send({Error : "Unknown server error" })
-          .end();
+        datastore.runQuery(query).then(raws => {
+          var entities = raws[0];
+          var valid = true;
+          entities.forEach(element => {
+            if(element.name == req.body.name && element.artist == req.body.artist){
+              valid = false;
+              res
+              .status(403)
+              .send({Error : "Song is already in the database" })
+              .end();
+            }
+          });
+          if(valid){
+            var song = {
+              name : entity.name,
+              artist : entity.artist,
+              length : entity.length,
+              bpm : entity.bpm,
+              vocals : entity.vocals,
+              genres : entity.genres,
+              timestamp : entity.timestamp
+            };
+    
+            Object.keys(values).forEach(element => {
+              song[element] = values[element];
+            });
+    
+            const songEntity = {
+              key : querykey,
+              data : song
+            };
+            datastore.update(songEntity).then(() => {
+              res
+              .status(200)
+              .json({
+                id:querykey.id,
+                name:song.name,
+                artist:song.artist,
+                length:song.length,
+                bpm:song.bpm,
+                vocals:song.vocals,
+                genres:song.genres,
+                timestamp:song.timestamp,
+                self:URL + "songs/"+querykey.id})
+              .end();
+            }).catch(() => {
+              res
+              .status(500)
+              .send({Error : "Unknown server error" })
+              .end();
+            });
+          }
         });
       }
     });
