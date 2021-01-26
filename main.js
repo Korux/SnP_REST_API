@@ -9,6 +9,7 @@ const {Datastore} = require('@google-cloud/datastore');
 const {Storage} = require('@google-cloud/storage');
 const request = require('request');
 const datastore = new Datastore();
+const storage = new Storage();
 const cors = require('cors');
 
 const jwt = require('express-jwt');
@@ -20,8 +21,10 @@ const DOMAIN = 'cs493-291619.us.auth0.com';
 const URL = 'https://final-dot-cs493-291619.wl.r.appspot.com/';
 const PORT = process.env.PORT || 8080;
 
-const MP3_STORAGE = 'songs_mp3';
-const IMG_STORAGE = 'snp_imgs';
+const STORAGE_URL = 'https://storage.googleapis.com/snp_img/';
+const MP3_URL = 'https://storage.googleapis.com/snp_mp3/';
+const mp3Bucket = storage.bucket('snp_mp3');
+const imgBucket = storage.bucket('snp_img');
 
 app.use(cors());
 
@@ -561,61 +564,70 @@ app.patch('/songs/:songid',checkJwt(), (req,res) => {
       }else if (entity == null){
         res.status(404).send({Error:"No song with this song_id exists"}).end();
       }else{
-        const query = datastore.createQuery('song');
 
-        datastore.runQuery(query).then(raws => {
-          var entities = raws[0];
-          var valid = true;
-          entities.forEach(element => {
-            if(element.name == req.body.name && element.artist == req.body.artist){
-              valid = false;
+        new Promise((resolve,reject) => {
+            if(nameTaken == false && artistTaken == false){
+              resolve(true);
+            }else{
+              const query = datastore.createQuery('song');
+  
+              datastore.runQuery(query).then(raws => {
+                var entities = raws[0];
+                entities.forEach(element => {
+                  if(element.name == req.body.name && element.artist == req.body.artist){
+                    resolve(false);
+                  }
+                });
+                resolve(true);
+              });
+            }
+          }).then(val => {
+            if(val){
+              var song = {
+                name : entity.name,
+                artist : entity.artist,
+                length : entity.length,
+                bpm : entity.bpm,
+                vocals : entity.vocals,
+                genres : entity.genres,
+                timestamp : entity.timestamp
+              };
+      
+              Object.keys(values).forEach(element => {
+                song[element] = values[element];
+              });
+      
+              const songEntity = {
+                key : querykey,
+                data : song
+              };
+              datastore.update(songEntity).then(() => {
+                res
+                .status(200)
+                .json({
+                  id:querykey.id,
+                  name:song.name,
+                  artist:song.artist,
+                  length:song.length,
+                  bpm:song.bpm,
+                  vocals:song.vocals,
+                  genres:song.genres,
+                  timestamp:song.timestamp,
+                  self:URL + "songs/"+querykey.id})
+                .end();
+              }).catch(() => {
+                res
+                .status(500)
+                .send({Error : "Unknown server error" })
+                .end();
+              });
+            }else{
               res
-              .status(403)
-              .send({Error : "Song is already in the database" })
-              .end();
+                .status(403)
+                .send({Error : "Song is already in the database" })
+                .end();
             }
           });
-          if(valid){
-            var song = {
-              name : entity.name,
-              artist : entity.artist,
-              length : entity.length,
-              bpm : entity.bpm,
-              vocals : entity.vocals,
-              genres : entity.genres,
-              timestamp : entity.timestamp
-            };
-    
-            Object.keys(values).forEach(element => {
-              song[element] = values[element];
-            });
-    
-            const songEntity = {
-              key : querykey,
-              data : song
-            };
-            datastore.update(songEntity).then(() => {
-              res
-              .status(200)
-              .json({
-                id:querykey.id,
-                name:song.name,
-                artist:song.artist,
-                length:song.length,
-                bpm:song.bpm,
-                vocals:song.vocals,
-                genres:song.genres,
-                timestamp:song.timestamp,
-                self:URL + "songs/"+querykey.id})
-              .end();
-            }).catch(() => {
-              res
-              .status(500)
-              .send({Error : "Unknown server error" })
-              .end();
-            });
-          }
-        });
       }
     });
   }else{
